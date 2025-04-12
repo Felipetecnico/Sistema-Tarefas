@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerenciador de Tarefas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+    input, button {
+      padding: 8px;
+      font-size: 16px;
+    }
+    .completed {
+      text-decoration: line-through;
+      color: gray;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    li {
+      margin-bottom: 10px;
+    }
+    button {
+      margin: 5px 5px 5px 0;
+    }
+    #historySection {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📝 Gerenciador de Tarefas</h1>
+
+  <input type="text" id="taskInput" placeholder="Digite uma tarefa..." />
+  <button onclick="addTask()">Adicionar</button>
+  <button onclick="showHistory()">Histórico de Tarefas</button>
+
+  <h2>📋 Lista de Tarefas</h2>
+  <ul id="taskList"></ul>
+
+  <div id="historySection">
+    <h2>🕓 Histórico de Tarefas</h2>
+    <ul id="historyList"></ul>
+  </div>
+
+  <script>
+    class TaskManager {
+      constructor() {
+        this.tasks = [];
+        this.nextId = 1;
+      }
+
+      addTask(description) {
+        const task = {
+          id: this.nextId++,
+          description,
+          completed: false
+        };
+        this.tasks.push(task);
+        return task;
+      }
+
+      completeTask(id) {
+        const task = this.tasks.find(task => task.id === id);
+        if (task) {
+          task.completed = true;
+          return true;
+        }
+        return false;
+      }
+
+      listTasks() {
+        return this.tasks;
+      }
+    }
+
+    const manager = new TaskManager();
+
+    function addTask() {
+      const input = document.getElementById("taskInput");
+      const description = input.value.trim();
+      if (description !== "") {
+        manager.addTask(description);
+        input.value = "";
+        renderTasks();
+      }
+    }
+
+    function completeTask(id) {
+      manager.completeTask(id);
+      renderTasks();
+    }
+
+    function renderTasks() {
+      const list = document.getElementById("taskList");
+      list.innerHTML = "";
+
+      const tasks = manager.listTasks().slice().reverse();
+
+      tasks.forEach(task => {
+        const li = document.createElement("li");
+
+        const statusText = task.completed ? "✔ Concluída" : "⏳ Pendente";
+        li.textContent = `#${task.id} - ${task.description} [${statusText}]`;
+
+        if (task.completed) {
+          li.classList.add("completed");
+        } else {
+          const btn = document.createElement("button");
+          btn.textContent = "Concluir";
+          btn.onclick = () => completeTask(task.id);
+          li.appendChild(document.createTextNode(" "));
+          li.appendChild(btn);
+        }
+
+        list.appendChild(li);
+      });
+    }
+
+    function showHistory() {
+      const historyList = document.getElementById("historyList");
+      historyList.innerHTML = "";
+
+      const tasks = manager.listTasks().slice().reverse();
+
+      if (tasks.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "Nenhuma tarefa registrada.";
+        historyList.appendChild(li);
+        return;
+      }
+
+      tasks.forEach(task => {
+        const li = document.createElement("li");
+        const statusText = task.completed ? "✔ Concluída" : "⏳ Pendente";
+        li.textContent = `#${task.id} - ${task.description} [${statusText}]`;
+        if (task.completed) {
+          li.classList.add("completed");
+        }
+        historyList.appendChild(li);
+      });
+    }
+
+    // Render inicial
+    renderTasks();
+  </script>
+</body>
+</html>
